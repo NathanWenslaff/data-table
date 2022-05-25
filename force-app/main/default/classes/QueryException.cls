@@ -1,1 +1,2 @@
-public with sharing class QueryException extends Exception {}
+public with sharing class QueryException extends Exception {
+}

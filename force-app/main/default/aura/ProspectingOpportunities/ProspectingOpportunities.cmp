@@ -1,0 +1,16 @@
+<aura:component
+  implements="flexipage:availableForRecordHome,force:hasRecordId"
+  controller="ProspectingOpportunitiesController"
+>
+  <!-- ATTRIBUTES -->
+  <aura:attribute name="loading" type="Boolean" default="true" />
+  <aura:attribute name="fields" type="List" default="[]" />
+  <aura:attribute name="records" type="List" default="[]" />
+  <aura:attribute name="error" type="String" default="" />
+
+  <!-- HANDLERS -->
+  <aura:handler name="init" value="{! this }" action="{! c.init }" />
+
+  <!-- MARKUP -->
+  <c:DataTable fields="{! v.fields }" records="{! v.records }" />
+</aura:component>

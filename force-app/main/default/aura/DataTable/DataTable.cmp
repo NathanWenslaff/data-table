@@ -1,0 +1,33 @@
+<!-- https://www.lightningdesignsystem.com/components/data-tables/ -->
+<aura:component>
+  <!-- ATTRIBUTES -->
+  <aura:attribute name="fields" type="List" default="[]" access="global" />
+  <aura:attribute name="records" type="List" default="[]" access="global" />
+
+  <!-- MARKUP -->
+  <table
+    class="slds-table slds-table_cell-buffer slds-table_bordered"
+    aria-labelledby="element-with-table-label other-element-with-table-label"
+  >
+    <thead>
+      <tr class="slds-line-height_reset">
+        <aura:iteration items="{! v.fields }" var="field">
+          <th class="" scope="col">
+            <div class="slds-truncate" title="{! field.label }">
+              {! field.apiName }
+            </div>
+          </th>
+        </aura:iteration>
+      </tr>
+    </thead>
+    <tbody>
+      <aura:iteration items="{! v.records }" var="record">
+        <tr class="slds-hint-parent">
+          <aura:iteration items="{! v.fields }" var="field">
+            <c:Cell record="{! record }" field="{! field }" />
+          </aura:iteration>
+        </tr>
+      </aura:iteration>
+    </tbody>
+  </table>
+</aura:component>

@@ -1,0 +1,14 @@
+<aura:component>
+  <!-- ATTRIBUTES -->
+  <aura:attribute name="record" type="Map" default="{}" access="global" />
+  <aura:attribute name="field" type="Map" default="{}" access="global" />
+  <aura:attribute name="value" type="String" default="" />
+
+  <!-- HANDLERS -->
+  <aura:handler name="init" value="{! this }" action="{! c.init }" />
+
+  <!-- MARKUP -->
+  <td data-label="{! v.field.label }">
+    <div class="slds-truncate" title="{! v.value }">{! v.value }</div>
+  </td>
+</aura:component>

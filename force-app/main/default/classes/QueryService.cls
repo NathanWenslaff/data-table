@@ -1,60 +1,84 @@
 public with sharing class QueryService {
-    public static final String COMMA_SEPARATED_FIELD_NAMES_REGEX = '^([A-Za-z0-9_]+)(?:,([A-Za-z0-9_]+))*$';
+  private static final String COMMA_SEPARATED_FIELD_NAMES_REGEX = '^[A-Za-z0-9_]+(?:,[A-Za-z0-9_]+)*$';
 
-    public static PaginatedResults getRecords(
-        List<String> fieldApiNames,
-        SObjectType sObjectType,
-        List<String> filters
-    ) {
-        System.debug('fieldApiNames: ' + fieldApiNames);
-        System.debug('sObjectType: ' + sObjectType);
-        System.debug('filters: ' + filters);
+  public static PaginatedResults getRecords(
+    List<String> fieldApiNames,
+    SObjectType sObjectType,
+    List<String> filters
+  ) {
+    System.debug('fieldApiNames: ' + fieldApiNames);
+    System.debug('sObjectType: ' + sObjectType);
+    System.debug('filters: ' + filters);
 
-        PaginatedResults paginatedResults = new PaginatedResults();
+    PaginatedResults paginatedResults = new PaginatedResults();
 
-        try {
-            System.debug('Building SOQL query');
+    try {
+      System.debug('Building SOQL query');
 
-            QueryFactory queryFactory = new QueryFactory()
-                .setSObjectType(String.valueOf(sObjectType))
-                .setFields(fieldApiNames)
-                .setFilters(filters);
+      QueryFactory queryFactory = new QueryFactory()
+        .setSObjectType(String.valueOf(sObjectType))
+        .setFields(fieldApiNames)
+        .setFilters(filters);
 
-            String recordQuery = queryFactory.toRecordQuery();
-            String countQuery = queryFactory.toCountQuery();
+      String recordQuery = queryFactory.toRecordQuery();
+      String countQuery = queryFactory.toCountQuery();
 
-            System.debug('recordQuery: ' + recordQuery);
-            System.debug('countQuery: ' + countQuery);
+      System.debug('recordQuery: ' + recordQuery);
+      System.debug('countQuery: ' + countQuery);
 
-            paginatedResults.results = Database.query(recordQuery);
-            paginatedResults.totalResults = Database.countQuery(countQuery);
-        } catch (Exception e) {
-            paginatedResults.error = e.getMessage();
-        }
-
-        return paginatedResults;
+      paginatedResults.results = Database.query(recordQuery);
+      paginatedResults.totalResults = Database.countQuery(countQuery);
+      paginatedResults.fields = describeFields(sObjectType, fieldApiNames);
+    } catch (Exception e) {
+      paginatedResults.error = e.getMessage();
     }
 
-    public static List<String> getFieldApiNamesFromCommaSeparatedList(String commaSeparatedFields) {
-        System.debug('commaSeparatedFields: ' + commaSeparatedFields);
+    return paginatedResults;
+  }
 
-        Pattern pattern = Pattern.compile(COMMA_SEPARATED_FIELD_NAMES_REGEX);
-        Matcher matcher = pattern.matcher(commaSeparatedFields);
-        Boolean matchesRegex = matcher.matches();
+  public static List<String> getFieldApiNamesFromCommaSeparatedList(
+    String commaSeparatedFields
+  ) {
+    System.debug('commaSeparatedFields: ' + commaSeparatedFields);
 
-        System.debug('matchesRegex: ' + matchesRegex);
+    Boolean matchesRegex = Pattern.matches(
+      COMMA_SEPARATED_FIELD_NAMES_REGEX,
+      commaSeparatedFields
+    );
 
-        if (matchesRegex) {
-            List<String> fieldApiNames = new List<String>();
+    System.debug('matchesRegex: ' + matchesRegex);
 
-            for (Integer i = 1; i < matcher.groupCount(); i++) {
-                System.debug('group: ' + matcher.group(i));
-                fieldApiNames.add(matcher.group(i));
-            }
-
-            return fieldApiNames;
-        } else {
-            throw new QueryException('Not a valid list of comma-separated field names');
-        }
+    if (matchesRegex) {
+      return commaSeparatedFields.split(',');
+    } else {
+      throw new QueryException(
+        'Not a valid list of comma-separated field names'
+      );
     }
+  }
+
+  private static List<FieldDescribe> describeFields(
+    SObjectType sObjectType,
+    List<String> fieldApiNames
+  ) {
+    DescribeSObjectResult describeResult = sObjectType.getDescribe();
+    Map<String, SObjectField> fieldsMap = describeResult.fields.getMap();
+    List<FieldDescribe> fieldDescribes = new List<FieldDescribe>();
+
+    for (String fieldApiName : fieldApiNames) {
+      fieldDescribes.add(describeField(fieldsMap.get(fieldApiName)));
+    }
+
+    return fieldDescribes;
+  }
+
+  private static FieldDescribe describeField(SObjectField sObjectField) {
+    DescribeFieldResult describeFieldResult = sObjectField.getDescribe();
+
+    FieldDescribe fieldDescribe = new FieldDescribe();
+    fieldDescribe.apiName = describeFieldResult.getName();
+    fieldDescribe.label = describeFieldResult.getLabel();
+
+    return fieldDescribe;
+  }
 }
