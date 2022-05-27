@@ -28,19 +28,10 @@ public with sharing class QueryService {
     List<FieldDescribe> fieldDescribes = new List<FieldDescribe>();
 
     for (String fieldApiName : fieldApiNames) {
-      fieldDescribes.add(describeField(fieldsMap.get(fieldApiName)));
+      SObjectField sObjectField = fieldsMap.get(fieldApiName);
+      fieldDescribes.add(new FieldDescribe(sObjectField));
     }
 
     return fieldDescribes;
-  }
-
-  private static FieldDescribe describeField(SObjectField sObjectField) {
-    DescribeFieldResult describeFieldResult = sObjectField.getDescribe();
-
-    FieldDescribe fieldDescribe = new FieldDescribe();
-    fieldDescribe.apiName = describeFieldResult.getName();
-    fieldDescribe.label = describeFieldResult.getLabel();
-
-    return fieldDescribe;
   }
 }
