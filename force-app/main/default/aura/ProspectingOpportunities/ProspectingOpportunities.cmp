@@ -6,11 +6,53 @@
   <aura:attribute name="loading" type="Boolean" default="true" />
   <aura:attribute name="fields" type="List" default="[]" />
   <aura:attribute name="records" type="List" default="[]" />
-  <aura:attribute name="error" type="String" default="" />
+  <aura:attribute name="message" type="String" default="" />
+  <aura:attribute name="newOpportunity" type="Object" />
 
   <!-- HANDLERS -->
   <aura:handler name="init" value="{! this }" action="{! c.init }" />
 
+  <!-- LIGHTNING DATA SERVICE -->
+  <force:recordData
+    aura:id="opportunityRecordCreator"
+    fields="AccountId,Name,StageName,CloseDate"
+    mode="EDIT"
+    targetFields="{! v.newOpportunity }"
+  />
+
   <!-- MARKUP -->
-  <c:DataTable fields="{! v.fields }" records="{! v.records }" />
+  <div class="slds-container slds-is-relative">
+    <aura:if isTrue="{! v.loading }">
+      <div class="spinner">
+        <lightning:spinner
+          aura:id="spinner"
+          alternativeText="Loading...."
+          variant="brand"
+        />
+      </div>
+    </aura:if>
+
+    <aura:if isTrue="{! not(v.loading) }">
+      <aura:if isTrue="{! not(v.message) }">
+        <c:DataTable fields="{! v.fields }" records="{! v.records }" />
+        <div class="slds-p-top_xxx-small">
+          <lightning:button
+            label="New"
+            title="New"
+            onclick="{! c.createRecord }"
+          />
+        </div>
+      </aura:if>
+      <aura:if isTrue="{! v.message }">
+        <div
+          class="slds-notify slds-notify_alert slds-alert_warning"
+          role="alert"
+        >
+          <span class="slds-assistive-text">Warning</span>
+          <lightning:icon iconName="utility:warning" size="x-small" />&nbsp;
+          <h2>{! v.message }</h2>
+        </div>
+      </aura:if>
+    </aura:if>
+  </div>
 </aura:component>

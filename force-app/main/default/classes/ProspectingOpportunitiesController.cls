@@ -1,25 +1,18 @@
 public with sharing class ProspectingOpportunitiesController {
   @AuraEnabled
   public static PaginatedResults getProspectingOpportunities(String accountId) {
-    System.debug('accountId: ' + accountId);
-
-    List<String> fieldApiNames = QueryService.getFieldApiNamesFromCommaSeparatedList(
-      Label.Prospecting_Opportunity_Fields
-    );
-
-    System.debug('fieldApiNames: ' + fieldApiNames);
-
-    List<String> filters = new List<String>{
+    String filter1 =
       'AccountId = ' +
       '\'' +
       String.escapeSingleQuotes(accountId) +
-      '\''
-    };
+      '\'';
+    String filter2 = 'StageName = \'' + Constants.STAGE_NAME_PROSPECTING + '\'';
 
-    return QueryService.getRecords(
-      fieldApiNames,
-      Opportunity.SObjectType,
-      filters
-    );
+    QueryFactory queryFactory = new QueryFactory()
+      .setSObjectType(Opportunity.SObjectType)
+      .setFields(Label.Prospecting_Opportunity_Fields)
+      .setFilters(new List<String>{ filter1, filter2 });
+
+    return QueryService.getRecords(queryFactory);
   }
 }

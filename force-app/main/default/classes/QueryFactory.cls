@@ -1,11 +1,27 @@
 public with sharing class QueryFactory {
-  String sObjectType;
+  private static final String COMMA_SEPARATED_FIELD_NAMES_REGEX = '^[A-Za-z0-9_]+(?:,[A-Za-z0-9_]+)*$';
+
+  SObjectType sObjectType;
   List<String> fields;
   List<String> filters;
 
-  public QueryFactory setSObjectType(String sObjectType) {
+  public SObjectType getSObjectType() {
+    return this.sObjectType;
+  }
+
+  public QueryFactory setSObjectType(SObjectType sObjectType) {
     this.sObjectType = sObjectType;
     return this;
+  }
+
+  public List<String> getFields() {
+    return this.fields;
+  }
+
+  public QueryFactory setFields(String commaSeparatedFields) {
+    return this.setFields(
+      getFieldApiNamesFromCommaSeparatedList(commaSeparatedFields)
+    );
   }
 
   public QueryFactory setFields(List<String> fields) {
@@ -39,7 +55,7 @@ public with sharing class QueryFactory {
     }
 
     // FROM
-    clauses.add('FROM ' + this.sObjectType);
+    clauses.add('FROM ' + String.valueOf(this.sObjectType));
 
     // WHERE
     if (this.filters != null && !this.filters.isEmpty()) {
@@ -59,6 +75,23 @@ public with sharing class QueryFactory {
     } else if (this.fields == null || this.fields.isEmpty()) {
       throw new QueryException(
         'Cannot build SOQL query without a list of fields'
+      );
+    }
+  }
+
+  private static List<String> getFieldApiNamesFromCommaSeparatedList(
+    String commaSeparatedFields
+  ) {
+    Boolean matchesRegex = Pattern.matches(
+      COMMA_SEPARATED_FIELD_NAMES_REGEX,
+      commaSeparatedFields
+    );
+
+    if (matchesRegex) {
+      return commaSeparatedFields.split(',');
+    } else {
+      throw new QueryException(
+        'Not a valid list of comma-separated field names'
       );
     }
   }
