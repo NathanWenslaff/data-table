@@ -6,12 +6,12 @@ public with sharing class QueryService {
       String recordQuery = queryFactory.toRecordQuery();
       String countQuery = queryFactory.toCountQuery();
 
-      paginatedResults.results = Database.query(recordQuery);
-      paginatedResults.totalResults = Database.countQuery(countQuery);
       paginatedResults.fields = describeFields(
         queryFactory.getSObjectType(),
         queryFactory.getFields()
       );
+      paginatedResults.results = Database.query(recordQuery);
+      paginatedResults.totalResults = Database.countQuery(countQuery);
     } catch (Exception e) {
       paginatedResults.error = e.getMessage();
     }
