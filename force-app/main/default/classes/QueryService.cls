@@ -1,4 +1,9 @@
 public with sharing class QueryService {
+  /**
+   * @description Queries for records based on the provided QueryFactory instance
+   * @param  queryFactory Builds the SOQL queries needed to get the records
+   * @return              Returns a paginated list of records
+   */
   public static PaginatedResults getRecords(QueryFactory queryFactory) {
     PaginatedResults paginatedResults = new PaginatedResults();
 
