@@ -4,18 +4,17 @@
       .executeAction(component, "c.getProspectingOpportunities", {
         accountId: component.get("v.recordId")
       })
-      .then(
-        $A.getCallback(function (paginatedResults) {
-          if (paginatedResults.error) {
-            throw new Error(paginatedResults.error);
-          } else if (paginatedResults.results.length === 0) {
-            throw new Error("No Prospecting Opportunity records found");
-          } else {
-            component.set("v.records", paginatedResults.results);
-            component.set("v.fields", paginatedResults.fields);
-          }
-        })
-      );
+      .then(function (paginatedResults) {
+        if (paginatedResults.error) {
+          throw new Error(paginatedResults.error);
+        } else if (paginatedResults.results.length === 0) {
+          component.set("v.hasNoRecords", true);
+          throw new Error("No Prospecting Opportunity records found");
+        } else {
+          component.set("v.records", paginatedResults.results);
+          component.set("v.fields", paginatedResults.fields);
+        }
+      });
   },
 
   initializeRecord: function (component) {
@@ -25,7 +24,7 @@
         "Opportunity",
         null,
         false,
-        $A.getCallback(function () {
+        function () {
           var record = component.get("v.newOpportunity"),
             newOpportunityError = opportunityRecordCreator.get("v.targetError");
 
@@ -45,7 +44,7 @@
             component.set("v.newOpportunity", record);
             resolve();
           }
-        })
+        }
       );
     });
   },
@@ -55,6 +54,21 @@
       var opportunityRecordCreator = component.find("opportunityRecordCreator");
       opportunityRecordCreator.saveRecord(function (result) {
         if (result.state === "SUCCESS" || result.state === "DRAFT") {
+          var hasNoRecords = component.get("v.hasNoRecords");
+
+          if (hasNoRecords) {
+            component.set("v.hasNoRecords", false);
+            component.set("v.message", "");
+          }
+
+          component.set("v.hasNoRecords", false);
+          var toastEvent = $A.get("e.force:showToast");
+          toastEvent.setParams({
+            title: "Success!",
+            type: "Success",
+            message: "New Opportunity record created!"
+          });
+          toastEvent.fire();
           $A.get("e.force:refreshView").fire();
           resolve();
         } else {

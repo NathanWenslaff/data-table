@@ -14,6 +14,7 @@
   <aura:attribute name="records" type="List" default="[]" />
   <aura:attribute name="message" type="String" default="" />
   <aura:attribute name="newOpportunity" type="Object" />
+  <aura:attribute name="hasNoRecords" type="Boolean" default="false" />
 
   <!-- LIGHTNING DATA SERVICE -->
   <force:recordData
@@ -25,6 +26,7 @@
 
   <!-- MARKUP -->
   <div class="slds-container slds-is-relative">
+    <!-- SPINNER -->
     <aura:if isTrue="{! v.loading }">
       <div class="spinner">
         <lightning:spinner
@@ -36,16 +38,12 @@
     </aura:if>
 
     <aura:if isTrue="{! not(v.loading) }">
+      <!-- DATATABLE -->
       <aura:if isTrue="{! not(v.message) }">
         <c:DataTable fields="{! v.fields }" records="{! v.records }" />
-        <div class="slds-p-top_xxx-small">
-          <lightning:button
-            label="New"
-            title="New"
-            onclick="{! c.createRecord }"
-          />
-        </div>
       </aura:if>
+
+      <!-- MESSAGE -->
       <aura:if isTrue="{! v.message }">
         <div
           class="slds-notify slds-notify_alert slds-alert_warning"
@@ -56,6 +54,15 @@
           <h2>{! v.message }</h2>
         </div>
       </aura:if>
+
+      <!-- CREATE OPPORTUNITY BUTTON -->
+      <div class="slds-p-top_xxx-small">
+        <lightning:button
+          label="New"
+          title="New"
+          onclick="{! c.createRecord }"
+        />
+      </div>
     </aura:if>
   </div>
 </aura:component>
